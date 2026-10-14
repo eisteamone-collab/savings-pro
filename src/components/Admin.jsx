@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import { useTable, updateRecord, createRecord, deleteRecord } from "../lib/useData";
 import { supabase } from "../lib/supabase";
 import { getSessionMemberId } from "../lib/auth";
-import { money, formatDate, generateReferralCode, maintenanceStatus, formatTime, LEVEL_CONFIG, MAX_BONUS_LEVEL } from "../lib/helpers";
+import { money, formatDate, generateReferralCode, maintenanceStatus, formatTime, LEVEL_CONFIG, MAX_BONUS_LEVEL, setMaintenanceSeconds } from "../lib/helpers";
 import { distributePlacementCommissions } from "../lib/commissions";
 import { Button, Input, Label, Badge } from "./ui";
 import { Megaphone } from "lucide-react";
@@ -51,6 +51,8 @@ export default function Admin() {
   const [announcementText, setAnnouncementText] = useState("");
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
   const [savingAnnouncement, setSavingAnnouncement] = useState(false);
+  const [maintenanceTimerHours, setMaintenanceTimerHours] = useState("12");
+  const [savingTimer, setSavingTimer] = useState(false);
   const [monitorMember, setMonitorMember] = useState(null);
   const [previewReceipt, setPreviewReceipt] = useState(null);
   const [signedUrls, setSignedUrls] = useState({});
@@ -89,6 +91,9 @@ export default function Admin() {
     setAutoRedeemEnabled(map.auto_redeem_enabled !== "false");
     setAnnouncementText(map.announcement_text || "");
     setAnnouncementEnabled(map.announcement_enabled === "true");
+    const timerHours = map.maintenance_timer_hours || "12";
+    setMaintenanceTimerHours(timerHours);
+    setMaintenanceSeconds(parseFloat(timerHours) * 3600);
   }, [settings]);
 
   // Live countdown — re-render every second so maintenance timers tick down
@@ -557,6 +562,21 @@ export default function Admin() {
       window.dispatchEvent(new CustomEvent("system_settings_changed"));
     } catch (err) { toast.error(err?.message || "Failed to save announcement"); }
     setSavingAnnouncement(false);
+  }
+
+  async function saveMaintenanceTimerHours() {
+    const hours = parseFloat(maintenanceTimerHours);
+    if (isNaN(hours) || hours <= 0) { toast.error("Enter a valid number of hours"); return; }
+    setSavingTimer(true);
+    try {
+      const existing = settings.find(s => s.setting_key === "maintenance_timer_hours");
+      if (existing) await updateRecord("system_settings", existing.id, { setting_value: String(hours) });
+      else await createRecord("system_settings", { setting_key: "maintenance_timer_hours", setting_value: String(hours) });
+      setMaintenanceSeconds(hours * 3600);
+      toast.success(`Maintenance timer set to ${hours} hour(s)`);
+      window.dispatchEvent(new CustomEvent("system_settings_changed"));
+    } catch { toast.error("Failed to update timer"); }
+    setSavingTimer(false);
   }
 
   async function toggleMlm() {
@@ -1458,7 +1478,7 @@ export default function Admin() {
           <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2"><Layers className="w-5 h-5 text-purple-500" /> Multi-Level System</h2>
             <p className="text-sm text-gray-500 mb-4">Master switch for all MLM features: genealogy, commission plan, withdrawals, wallets, and transaction history. When off, these are hidden from both member accounts and this admin panel.</p>
-            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100">
+            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 mb-4">
               <div>
                 <span className="font-medium text-gray-700">Multi-Level System Enabled</span>
                 <p className="text-xs text-gray-400">Toggles genealogy, complan, commissions, withdraw buttons, withdraw wallets, and admin MLM tabs.</p>
@@ -1467,6 +1487,45 @@ export default function Admin() {
                 className={`relative w-12 h-6 rounded-full transition-colors ${mlmEnabled ? "bg-green-500" : "bg-gray-300"}`}>
                 <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${mlmEnabled ? "translate-x-6" : "translate-x-0.5"}`} />
               </button>
+            </div>
+
+            {/* Maintenance Timer Duration */}
+            <div className="border-t border-gray-100 pt-4 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="w-4 h-4 text-amber-500" />
+                <span className="font-medium text-gray-700">Maintenance Timer Duration</span>
+              </div>
+              <p className="text-xs text-gray-400 mb-3">How long a member stays green after redeeming a code (in hours).</p>
+              <div className="flex gap-3 items-end">
+                <div className="flex-1"><Label>Hours</Label><Input type="number" min="1" step="0.5" value={maintenanceTimerHours} onChange={e => setMaintenanceTimerHours(e.target.value)} /></div>
+                <Button onClick={saveMaintenanceTimerHours} disabled={savingTimer} className="bg-gradient-to-r from-amber-500 to-orange-600 text-white">Save</Button>
+              </div>
+            </div>
+
+            {/* Announcement Banner */}
+            <div className="border-t border-gray-100 pt-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Megaphone className="w-4 h-4 text-amber-500" />
+                <span className="font-medium text-gray-700">Announcement Banner</span>
+              </div>
+              <p className="text-xs text-gray-400 mb-3">Banner text shown above the member dashboard. Toggle visibility before saving.</p>
+              <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 mb-3">
+                <span className="text-sm font-medium text-gray-700">{announcementEnabled ? "Visible to users" : "Hidden from users"}</span>
+                <button onClick={() => setAnnouncementEnabled(v => !v)}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${announcementEnabled ? "bg-green-500" : "bg-gray-300"}`}>
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${announcementEnabled ? "translate-x-6" : ""}`} />
+                </button>
+              </div>
+              <textarea
+                value={announcementText}
+                onChange={e => setAnnouncementText(e.target.value)}
+                rows={3}
+                placeholder="Enter announcement text..."
+                className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 resize-none"
+              />
+              <Button onClick={saveAnnouncement} disabled={savingAnnouncement} className="mt-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white">
+                {savingAnnouncement ? "Saving..." : "Save Announcement"}
+              </Button>
             </div>
           </div>
           <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6">

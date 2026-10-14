@@ -1,6 +1,15 @@
-// Maintenance status: 12-hour green cycle after redeem, no timer for red banner
-const MAINTENANCE_SECONDS = 43200; // 12 hours — green banner after redeem
+// Maintenance status: configurable green cycle after redeem, no timer for red banner
+let MAINTENANCE_SECONDS = 43200; // 12 hours default — overridable via setMaintenanceSeconds
 const GRACE_SECONDS = 0; // no timer — red banner before first redeem
+
+export function setMaintenanceSeconds(seconds) {
+  const s = Number(seconds);
+  if (s > 0) MAINTENANCE_SECONDS = s;
+}
+
+export function getMaintenanceSeconds() {
+  return MAINTENANCE_SECONDS;
+}
 
 export function maintenanceStatus(member, codes = []) {
   if (!member) return { isGreen: false, secondsLeft: 0, neverRedeemed: true };
@@ -18,7 +27,7 @@ export function maintenanceStatus(member, codes = []) {
     return { isGreen: left > 0, secondsLeft: Math.max(0, left), neverRedeemed: false };
   }
 
-  // User has redeemed a code — GREEN with 12h countdown from last redeem
+  // User has redeemed a code — GREEN with countdown from last redeem
   const usedCodes = codes.filter(c => c.is_used && c.used_by_member_id === member.id && c.used_at);
   if (usedCodes.length > 0) {
     const lastUsed = usedCodes
