@@ -12,7 +12,7 @@ const STATS = [
 ];
 
 const LOGO_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/ae16dfe62_Firefly2.png";
-const POSTER_URL = "https://media.base44.com/images/public/6ac1daab80dea63a77ad8fa1/bc22b8f15_LOA-EdisonNoconCelindro3.png";
+const POSTER_URL = "https://media.base44.com/images/public/6ace49faeb6f2fe9616499fd/7c2cea0a6_ModernMarketingTrifoldBrochure.png";
 const BG_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/6a9bb420c_images.jpg";
 
 export default function Landing() {
