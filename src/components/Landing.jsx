@@ -61,7 +61,7 @@ export default function Landing() {
             <div className="bg-amber-500/10 border border-amber-400/40 rounded-2xl px-6 py-4 max-w-3xl text-center">
               <p className="text-amber-300 font-bold text-lg sm:text-2xl md:text-3xl leading-snug tracking-wide drop-shadow-lg">Puro Gastos na lang ba sa Tindahan?</p>
               <p className="text-amber-100 font-semibold italic text-base sm:text-xl md:text-2xl leading-relaxed mt-1">
-                Tara na! Mag-Savings Pro! Dito ikaw naman ang kikita bilang Customer sa simpleng paraan lang.
+                Lahat ng Bayad mo, magiging Ipon mo sa sarili mong Savings Pro Account ! Maging Suki na gamit ang Savings Pro !
               </p>
             </div>
           </div>
