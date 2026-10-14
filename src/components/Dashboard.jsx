@@ -316,6 +316,7 @@ export default function Dashboard() {
               <div>
                 <h2 className="text-lg font-bold text-white">Maintenance Code</h2>
                 <p className="text-sm text-emerald-50">Paki-Paste po sa box sa ibaba ang iyong eksaktong Code at i-click ang "Redeem Code" button</p>
+                <p className="text-xs text-emerald-100 mt-1">Minimum withdrawal: ₱{minAmount.toLocaleString()}</p>
               </div>
             </div>
           </div>
