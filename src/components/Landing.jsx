@@ -5,10 +5,10 @@ import { ArrowRight, LogIn, Crown } from "lucide-react";
 import { Button } from "./ui";
 
 const STATS = [
-  { label: "Active Members", value: "Growing" },
-  { label: "Total Paid Out", value: "More" },
-  { label: "Savings Pro Levels", value: "5 Levels" },
-  { label: "Max Downlines", value: "8 Direct" },
+  { label: "Active Members", value: "Related to Savings Pro details" },
+  { label: "Total Paid Out", value: "Related to Savings Pro details" },
+  { label: "Savings Pro Levels", value: "Related to Savings Pro details" },
+  { label: "Max Downlines", value: "Related to Savings Pro details" },
 ];
 
 const LOGO_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/ae16dfe62_Firefly2.png";
