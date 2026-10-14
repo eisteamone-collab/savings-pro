@@ -1,7 +1,7 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Archive, Copy, KeyRound, ArrowRight, CheckCircle2, Clock, History } from "lucide-react";
+import { Archive, Copy, KeyRound, ArrowRight, CheckCircle2, Clock, History, DollarSign } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, useCurrentMember } from "../lib/useData";
 import { supabase } from "../lib/supabase";
@@ -149,6 +149,7 @@ export default function CodeCabinet() {
               <div key={c.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="font-mono font-bold text-gray-900">{c.code}</p>
+                  <p className="text-xs text-emerald-600 font-semibold mt-0.5">Amount: ₱{Number(c.amount || 0).toLocaleString()}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Received {formatDate(c.created_at, "MMM d, yyyy h:mm a")}</p>
                   {!canRedeem && (
                     <p className="text-xs font-semibold text-orange-600 mt-1 flex items-center gap-1">
@@ -188,6 +189,7 @@ export default function CodeCabinet() {
               <div key={h.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="font-mono font-bold text-gray-700">{h.code}</p>
+                  <p className="text-xs text-emerald-600 font-semibold mt-0.5">Amount: ₱{Number(h.amount || 0).toLocaleString()}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Redeemed {formatDate(h.redeemed_at, "MMM d, yyyy h:mm a")}</p>
                 </div>
                 <Badge className="bg-green-100 text-green-700">Completed</Badge>
@@ -208,6 +210,7 @@ export default function CodeCabinet() {
               <div key={c.id} className="flex items-center justify-between px-6 py-4">
                 <div>
                   <p className="font-mono font-bold text-gray-400">{c.code}</p>
+                  <p className="text-xs text-emerald-600 font-semibold mt-0.5">Amount: ₱{Number(c.amount || 0).toLocaleString()}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Redeemed {c.used_at ? formatDate(c.used_at, "MMM d, yyyy h:mm a") : "—"}</p>
                 </div>
                 <Badge className="bg-gray-100 text-gray-500">Redeemed</Badge>

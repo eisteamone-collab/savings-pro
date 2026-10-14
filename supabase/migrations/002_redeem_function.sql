@@ -16,8 +16,8 @@ begin
   set is_used=true,used_by_member_id=p_member_id,used_at=now()
   where id=c.id;
 
-  insert into public.code_redemption_history (code_id, code, redeemed_by_member_id, redeemed_by_username, store_member_id, redeemed_at, status)
-    values (c.id, c.code, p_member_id, m.username, null, now(), 'completed');
+  insert into public.code_redemption_history (code_id, code, amount, redeemed_by_member_id, redeemed_by_username, store_member_id, redeemed_at, status)
+    values (c.id, c.code, c.amount, p_member_id, m.username, null, now(), 'completed');
 
   update public.members
   set maintenance_timer_seconds=null,maintenance_timer_set_at=null,updated_at=now()

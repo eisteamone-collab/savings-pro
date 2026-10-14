@@ -73,8 +73,8 @@ begin
     update public.maintenance_codes set is_used = true, used_by_member_id = r.id, used_at = clock_timestamp() where id = c.id;
     insert into public.transactions (member_id, type, amount, description, status)
       values (r.id, 'maintenance_code', 0, 'Redeemed maintenance code: ' || c.code, 'completed');
-    insert into public.code_redemption_history (code_id, code, redeemed_by_member_id, redeemed_by_username, store_member_id, redeemed_at, status)
-      values (c.id, c.code, r.id, r.username, c.generated_by_store_id, clock_timestamp(), 'completed');
+    insert into public.code_redemption_history (code_id, code, amount, redeemed_by_member_id, redeemed_by_username, store_member_id, redeemed_at, status)
+      values (c.id, c.code, c.amount, r.id, r.username, c.generated_by_store_id, clock_timestamp(), 'completed');
 
     -- 5-level upline commission (₱1 per level), only to approved uplines with green maintenance
     cur := r.id;

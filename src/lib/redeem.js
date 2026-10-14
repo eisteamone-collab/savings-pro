@@ -30,6 +30,7 @@ export async function redeemCode(codeRecord, currentMember, allMembers, allCodes
   writes.push(supabase.from("code_redemption_history").insert({
     code_id: codeRecord.id,
     code: codeRecord.code,
+    amount: codeRecord.amount || 0,
     redeemed_by_member_id: currentMember.id,
     redeemed_by_username: currentMember.username,
     store_member_id: codeRecord.generated_by_store_id || null,
@@ -79,6 +80,7 @@ export async function redeemCodeForMember(codeRecord, member, allMembers, allCod
   writes.push(supabase.from("code_redemption_history").insert({
     code_id: codeRecord.id,
     code: codeRecord.code,
+    amount: codeRecord.amount || 0,
     redeemed_by_member_id: member.id,
     redeemed_by_username: member.username,
     store_member_id: codeRecord.generated_by_store_id || null,
