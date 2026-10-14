@@ -5,10 +5,10 @@ import { ArrowRight, LogIn, Crown } from "lucide-react";
 import { Button } from "./ui";
 
 const STATS = [
-  { label: "Active Members", value: "Growing" },
-  { label: "Total Paid Out", value: "More" },
-  { label: "Savings Pro Levels", value: "5 Levels" },
-  { label: "Max Downlines", value: "8 Direct" },
+  { label: "Membership Fee", value: "Free" },
+  { label: "Every Purchase", value: "Ipon" },
+  { label: "Sign Up", value: "Easy" },
+  { label: "Be a Suki", value: "Today" },
 ];
 
 const LOGO_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/ae16dfe62_Firefly2.png";
