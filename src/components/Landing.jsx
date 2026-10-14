@@ -67,7 +67,7 @@ export default function Landing() {
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-6">
             "No Membership Fee !"
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Bibili ka lang ng bigas na dati na natin ginagawa at i-share sa iba ang Savings Pro</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Bibili ka lang ng mga Produkto na dati na natin ginagawa at maging Suki lang ng Savings Pro !</span>
           </h1>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/Register" className="w-full sm:w-auto">
