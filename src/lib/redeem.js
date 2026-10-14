@@ -17,11 +17,13 @@ export async function redeemCode(codeRecord, currentMember, allMembers, allCodes
     })
     .eq("id", codeRecord.id)];
 
+  const codeAmount = codeRecord.amount || 0;
+
   // Record transaction for the user
   writes.push(supabase.from("transactions").insert({
     member_id: currentMember.id,
     type: "maintenance_code",
-    amount: 0,
+    amount: codeAmount,
     description: `Redeemed maintenance code: ${codeRecord.code}`,
     status: "completed",
   }));
@@ -30,13 +32,21 @@ export async function redeemCode(codeRecord, currentMember, allMembers, allCodes
   writes.push(supabase.from("code_redemption_history").insert({
     code_id: codeRecord.id,
     code: codeRecord.code,
-    amount: codeRecord.amount || 0,
+    amount: codeAmount,
     redeemed_by_member_id: currentMember.id,
     redeemed_by_username: currentMember.username,
     store_member_id: codeRecord.generated_by_store_id || null,
     redeemed_at: new Date().toISOString(),
     status: "completed",
   }));
+
+  // Add code amount to the user's current balance
+  if (codeAmount > 0) {
+    writes.push(supabase.rpc("add_code_amount_to_balance", {
+      p_member_id: currentMember.id,
+      p_amount: codeAmount,
+    }));
+  }
 
   // Fetch fresh data so upline maintenance status is accurate
   await Promise.all(writes);
@@ -69,10 +79,12 @@ export async function redeemCodeForMember(codeRecord, member, allMembers, allCod
     })
     .eq("id", codeRecord.id)];
 
+  const codeAmount = codeRecord.amount || 0;
+
   writes.push(supabase.from("transactions").insert({
     member_id: member.id,
     type: "maintenance_code",
-    amount: 0,
+    amount: codeAmount,
     description: `Redeemed maintenance code: ${codeRecord.code}`,
     status: "completed",
   }));
@@ -80,13 +92,21 @@ export async function redeemCodeForMember(codeRecord, member, allMembers, allCod
   writes.push(supabase.from("code_redemption_history").insert({
     code_id: codeRecord.id,
     code: codeRecord.code,
-    amount: codeRecord.amount || 0,
+    amount: codeAmount,
     redeemed_by_member_id: member.id,
     redeemed_by_username: member.username,
     store_member_id: codeRecord.generated_by_store_id || null,
     redeemed_at: new Date().toISOString(),
     status: "completed",
   }));
+
+  // Add code amount to the user's current balance
+  if (codeAmount > 0) {
+    writes.push(supabase.rpc("add_code_amount_to_balance", {
+      p_member_id: member.id,
+      p_amount: codeAmount,
+    }));
+  }
 
   await Promise.all(writes);
   const [{ data: freshMembers }, { data: freshCodes }] = await Promise.all([
