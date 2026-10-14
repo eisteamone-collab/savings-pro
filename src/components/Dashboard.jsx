@@ -254,11 +254,7 @@ export default function Dashboard() {
                 <div className="bg-white/20 rounded-2xl px-5 py-3 flex items-center gap-2 text-white text-sm font-semibold">
                   <Clock className="w-4 h-4" /> Withdrawal pending admin approval
                 </div>
-              ) : !canWithdraw ? (
-                <div className="bg-white/20 rounded-2xl px-5 py-3 flex items-center gap-2 text-white text-sm font-semibold">
-                  <Clock className="w-4 h-4" /> Withdrawal disabled by admin
-                </div>
-              ) : (
+              ) : !canWithdraw ? null : (
                 <>
                   <Button onClick={handleWithdraw} disabled={withdrawValue < minAmount || withdrawValue > availableBalance}
                     className="bg-pink-600 text-white hover:bg-pink-700 font-bold text-base px-8 py-4 h-auto rounded-2xl shadow-lg disabled:opacity-100 disabled:text-white/40 disabled:bg-pink-600/50">
