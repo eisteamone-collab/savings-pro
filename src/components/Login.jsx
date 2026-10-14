@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { User, Lock, ArrowRight, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
@@ -13,6 +13,14 @@ export default function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPwd, setShowPwd] = useState(true);
   const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem("saved_login") || "{}");
+      if (saved.username) setForm(f => ({ ...f, username: saved.username }));
+      if (saved.password) setForm(f => ({ ...f, password: saved.password }));
+    } catch (_) { /* ignore */ }
+  }, []);
 
   async function submit(e) {
     e.preventDefault();
@@ -35,6 +43,7 @@ export default function Login() {
         return;
       }
       saveMemberSession(member.id);
+      localStorage.setItem("saved_login", JSON.stringify({ username: form.username, password: form.password }));
       prefetchTables(["members", "system_settings", "maintenance_codes", "transactions"]);
       toast.success(`Welcome back, ${member.full_name}!`);
       nav("/Dashboard");
