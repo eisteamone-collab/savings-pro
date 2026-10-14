@@ -5,14 +5,14 @@ import { ArrowRight, LogIn, Crown } from "lucide-react";
 import { Button } from "./ui";
 
 const STATS = [
-  { label: "Active Members", value: "Growing" },
-  { label: "Total Paid Out", value: "More" },
-  { label: "Savings Pro Levels", value: "5 Levels" },
-  { label: "Max Downlines", value: "8 Direct" },
+  { label: "Membership Fee", value: "Free" },
+  { label: "Every Purchase", value: "Ipon" },
+  { label: "Sign Up", value: "Easy" },
+  { label: "Be a Suki", value: "Today" },
 ];
 
 const LOGO_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/ae16dfe62_Firefly2.png";
-const POSTER_URL = "https://media.base44.com/images/public/6ac1daab80dea63a77ad8fa1/bc22b8f15_LOA-EdisonNoconCelindro3.png";
+const POSTER_URL = "https://media.base44.com/images/public/6ace49faeb6f2fe9616499fd/7c2cea0a6_ModernMarketingTrifoldBrochure.png";
 const BG_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/6a9bb420c_images.jpg";
 
 export default function Landing() {
@@ -57,17 +57,17 @@ export default function Landing() {
         >
           <div className="flex flex-col items-center mb-6">
             <img src={LOGO_URL} alt="Savings Pro Community" className="w-56 sm:w-72 mb-4 drop-shadow-2xl object-contain" />
-            <img src={POSTER_URL} alt="Kumikita Ka Ba sa Bigas na Binibili Mo?" className="w-full max-w-sm mx-auto mb-4 rounded-2xl drop-shadow-2xl object-cover" />
+            <img src={POSTER_URL} alt="Mga bayad mo sa Produktong binibili mo sa Tindahan, ipon mo na ngayon!" className="w-full max-w-2xl mx-auto mb-4 rounded-2xl drop-shadow-2xl object-cover" />
             <div className="bg-amber-500/10 border border-amber-400/40 rounded-2xl px-6 py-4 max-w-3xl text-center">
-              <p className="text-amber-300 font-bold text-lg sm:text-2xl md:text-3xl leading-snug tracking-wide drop-shadow-lg">Pagod ka na ba gumastos sa bigas?</p>
+              <p className="text-amber-300 font-bold text-lg sm:text-2xl md:text-3xl leading-snug tracking-wide drop-shadow-lg">Puro Gastos na lang ba sa Tindahan?</p>
               <p className="text-amber-100 font-semibold italic text-base sm:text-xl md:text-2xl leading-relaxed mt-1">
-                Tara na! Mag-Savings Pro! Dito ikaw naman ang kikita bilang Customer sa simpleng paraan lang.
+                Lahat ng Bayad mo, magiging Ipon mo sa sarili mong Savings Pro Account ! Maging Suki na gamit ang Savings Pro !
               </p>
             </div>
           </div>
           <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold leading-tight mb-6">
             "No Membership Fee !"
-            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Bibili ka lang ng bigas na dati na natin ginagawa at i-share sa iba ang Savings Pro</span>
+            <span className="block text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-500">Bibili ka lang ng mga Produkto na dati na natin ginagawa at maging Suki lang ng Savings Pro !</span>
           </h1>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/Register" className="w-full sm:w-auto">
@@ -108,8 +108,8 @@ export default function Landing() {
           className="max-w-3xl mx-auto bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/30 rounded-3xl p-10 text-center backdrop-blur-sm"
         >
           <Crown className="w-14 h-14 text-amber-400 mx-auto mb-4" />
-          <h2 className="text-4xl font-bold mb-4">Ready to Start Earning?</h2>
-          <p className="text-gray-300 text-lg mb-8">Join hundreds of members already growing their Savings Pro network and earning maintenance bonuses daily.</p>
+          <h2 className="text-4xl font-bold mb-4">Ready ka na bang maging ipon ang mga bayad mo sa Tindahan?</h2>
+          
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/Register" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-base sm:text-lg px-8 py-5 rounded-2xl shadow-xl shadow-amber-500/30">
