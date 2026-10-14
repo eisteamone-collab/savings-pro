@@ -109,7 +109,7 @@ export default function Landing() {
         >
           <Crown className="w-14 h-14 text-amber-400 mx-auto mb-4" />
           <h2 className="text-4xl font-bold mb-4">Ready ka na bang maging ipon ang mga bayad mo sa Tindahan?</h2>
-          <p className="text-gray-300 text-lg mb-8">Join hundreds of members already growing their Savings Pro network and earning maintenance bonuses daily.</p>
+          
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/Register" className="w-full sm:w-auto">
               <Button size="lg" className="w-full sm:w-auto bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white text-base sm:text-lg px-8 py-5 rounded-2xl shadow-xl shadow-amber-500/30">
