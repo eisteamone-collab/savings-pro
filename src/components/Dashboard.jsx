@@ -213,7 +213,7 @@ export default function Dashboard() {
               <div className="flex-1">
                 <p className="text-purple-100 text-base font-medium">Current Balance</p>
                 <p className="text-5xl font-extrabold text-white mt-1">{money(availableBalance)}</p>
-                <p className="text-purple-100 text-xs mt-1">Minimum withdrawal: ₱{minAmount.toLocaleString()}</p>
+                {mlmEnabled && <p className="text-purple-100 text-xs mt-1">Minimum withdrawal: ₱{minAmount.toLocaleString()}</p>}
               </div>
             </div>
             {availableBalance >= minAmount && !pendingWithdrawal && (
