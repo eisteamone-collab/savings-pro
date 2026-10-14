@@ -27,7 +27,6 @@ export default function Dashboard() {
   const termsVisible = settings.find(s => s.setting_key === "tab_terms_visible")?.setting_value !== "false";
   const productConversionVisible = settings.find(s => s.setting_key === "tab_product_conversion_visible")?.setting_value !== "false";
   const minWithdrawal = settings.find(s => s.setting_key === "withdrawal_minimum_amount")?.setting_value || "300";
-  const mlm_enabled = settings.find(s => s.setting_key === "mlm_enabled")?.setting_value !== "false";
   const minAmount = parseFloat(minWithdrawal);
 
   const myTx = currentMember ? transactions.filter(t => t.member_id === currentMember.id) : [];
@@ -199,8 +198,7 @@ export default function Dashboard() {
         <p className="text-gray-500 mt-2">Here's your Savings Pro network overview</p>
       </motion.div>
 
-      {/* Balance card + Maintenance code — hidden when MLM system is disabled */}
-      {mlm_enabled && (
+      {/* Balance card + Maintenance code */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
         {/* Balance card */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="lg:col-span-2 bg-gradient-to-br from-[#581c87] to-[#4c0519] rounded-3xl shadow-xl overflow-hidden flex flex-col">
@@ -357,10 +355,9 @@ export default function Dashboard() {
           </div>
         </motion.div>
       </div>
-      )}
 
-      {/* Referral link — hidden when MLM system is disabled */}
-      {mlm_enabled && currentMember.referral_code && (
+      {/* Referral link */}
+      {currentMember.referral_code && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-r from-cyan-600 to-blue-800 rounded-2xl p-6 shadow-lg mb-8">
           <div className="flex items-center gap-3 mb-4">
