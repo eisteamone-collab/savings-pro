@@ -51,14 +51,16 @@ export default function Layout({ children, currentPageName }) {
   const showMonitoring = settingsMap.tab_monitoring_visible !== "false";
   const showSubAdmin = settingsMap.tab_subadmin_visible !== "false";
   const showComPlan = settingsMap.tab_complan_visible !== "false";
+  const mlmEnabled = settingsMap.mlm_enabled !== "false";
 
   const isAdmin = member?.role === "admin";
   const isSubAdmin = member?.role === "sub_admin";
   const isSupAdmin = member?.username === "supadmin";
 
   let items = NAV_ITEMS.filter(item => {
-    if (item.path === "Monitoring") return showMonitoring;
-    if (item.path === "LevelBonuses") return showComPlan;
+    if (item.path === "Monitoring") return mlmEnabled && showMonitoring;
+    if (item.path === "LevelBonuses") return mlmEnabled && showComPlan;
+    if (["Genealogy", "Earnings"].includes(item.path)) return mlmEnabled;
     return true;
   });
   if (isAdmin || isSupAdmin) items = [...items, ...ADMIN_ITEMS];
