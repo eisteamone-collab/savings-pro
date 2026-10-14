@@ -108,7 +108,7 @@ export default function Landing() {
           className="max-w-3xl mx-auto bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/30 rounded-3xl p-10 text-center backdrop-blur-sm"
         >
           <Crown className="w-14 h-14 text-amber-400 mx-auto mb-4" />
-          <h2 className="text-4xl font-bold mb-4">Ready to Start Earning?</h2>
+          <h2 className="text-4xl font-bold mb-4">Ready ka na bang maging ipon ang mga bayad mo sa Tindahan?</h2>
           <p className="text-gray-300 text-lg mb-8">Join hundreds of members already growing their Savings Pro network and earning maintenance bonuses daily.</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/Register" className="w-full sm:w-auto">
