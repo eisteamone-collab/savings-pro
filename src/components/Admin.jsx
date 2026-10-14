@@ -708,16 +708,24 @@ export default function Admin() {
                   </div>
                   {/* Status badge */}
                   <div className="flex-shrink-0">
-                    {status.isGreen ? (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 rounded-lg">
-                        <div className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm font-medium text-green-700">{formatTime(status.secondsLeft)}</span>
-                      </div>
+                    {mlmEnabled ? (
+                      status.isGreen ? (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 rounded-lg">
+                          <div className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm font-medium text-green-700">{formatTime(status.secondsLeft)}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 rounded-lg">
+                          <div className="w-2 h-2 bg-red-500 rounded-full" />
+                          <span className="text-sm font-medium text-red-700">{status.secondsLeft > 0 ? formatTime(status.secondsLeft) : "Expired"}</span>
+                        </div>
+                      )
                     ) : (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 rounded-lg">
-                        <div className="w-2 h-2 bg-red-500 rounded-full" />
-                        <span className="text-sm font-medium text-red-700">{status.secondsLeft > 0 ? formatTime(status.secondsLeft) : "Expired"}</span>
-                      </div>
+                      <button onClick={() => { setRedeemModal(m); setRedeemCode(""); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors cursor-pointer">
+                        <Ticket className="w-3.5 h-3.5 text-blue-600" />
+                        <span className="text-sm font-bold text-blue-600">{codes.filter(c => c.used_by_member_id === m.id).length}</span>
+                      </button>
                     )}
                   </div>
                   {/* Metrics */}
@@ -726,10 +734,12 @@ export default function Admin() {
                       <p className="text-xs text-gray-400">Balance</p>
                       <p className="text-sm font-bold text-gray-900">{money(getMemberBalance(m.id))}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-400">Downlines</p>
-                      <p className="text-sm font-bold text-gray-900">{getDirectDownlineCount(m.id)}/8</p>
-                    </div>
+                    {mlmEnabled && (
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400">Downlines</p>
+                        <p className="text-sm font-bold text-gray-900">{getDirectDownlineCount(m.id)}/8</p>
+                      </div>
+                    )}
                   </div>
                   {/* Action pills */}
                   <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -1477,7 +1487,7 @@ export default function Admin() {
           </div>
           <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2"><Layers className="w-5 h-5 text-purple-500" /> Multi-Level System</h2>
-            <p className="text-sm text-gray-500 mb-4">Master switch for all MLM features: genealogy, commission plan, withdrawals, wallets, and transaction history. When off, these are hidden from both member accounts and this admin panel.</p>
+            <p className="text-sm text-gray-500 mb-4">Master switch for all MLM features: genealogy, commission plan, withdrawals, wallets, transaction history, maintenance timer for codes, and referral link. When off, these are hidden from both member accounts and this admin panel.</p>
             <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 mb-4">
               <div>
                 <span className="font-medium text-gray-700">Multi-Level System Enabled</span>

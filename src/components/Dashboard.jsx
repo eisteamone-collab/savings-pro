@@ -26,6 +26,7 @@ export default function Dashboard() {
 
   const termsVisible = settings.find(s => s.setting_key === "tab_terms_visible")?.setting_value !== "false";
   const productConversionVisible = settings.find(s => s.setting_key === "tab_product_conversion_visible")?.setting_value !== "false";
+  const mlmEnabled = settings.find(s => s.setting_key === "mlm_enabled")?.setting_value !== "false";
   const minWithdrawal = settings.find(s => s.setting_key === "withdrawal_minimum_amount")?.setting_value || "300";
   const minAmount = parseFloat(minWithdrawal);
 
@@ -302,7 +303,8 @@ export default function Dashboard() {
           <div className="flex-1 bg-[#fdf5e6]"></div>
         </motion.div>
 
-        {/* Maintenance code redemption */}
+        {/* Maintenance code redemption (MLM) or simplified code count */}
+        {mlmEnabled ? (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
           className="bg-white/70 backdrop-blur-md rounded-3xl shadow-lg border border-white/60 overflow-hidden">
           <div className="p-6 border-b border-white/40 bg-gradient-to-r from-emerald-700 to-green-600">
@@ -354,10 +356,31 @@ export default function Dashboard() {
             )}
           </div>
         </motion.div>
+        ) : (
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+          className="bg-white/70 backdrop-blur-md rounded-3xl shadow-lg border border-white/60 p-6 flex flex-col items-center justify-center">
+          <Ticket className="w-10 h-10 text-blue-500 mb-3" />
+          <p className="text-sm text-gray-500 mb-1">Codes Redeemed</p>
+          <button onClick={() => setShowHistory(!showHistory)}
+            className="text-4xl font-extrabold text-blue-600 hover:text-blue-800 transition-colors cursor-pointer">
+            {myRedeemedCodes.length}
+          </button>
+          {myRedeemedCodes.length > 0 && showHistory && (
+            <div className="mt-4 w-full space-y-2 max-h-32 overflow-y-auto">
+              {myRedeemedCodes.map(c => (
+                <div key={c.id} className="flex items-center justify-between bg-blue-50 rounded-lg px-3 py-2">
+                  <code className="font-mono text-sm font-bold text-gray-900">{c.code}</code>
+                  <span className="text-xs text-gray-500">{formatDate(c.used_at, "MMM d, yyyy")}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </motion.div>
+        )}
       </div>
 
       {/* Referral link */}
-      {currentMember.referral_code && (
+      {mlmEnabled && currentMember.referral_code && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
           className="bg-gradient-to-r from-cyan-600 to-blue-800 rounded-2xl p-6 shadow-lg mb-8">
           <div className="flex items-center gap-3 mb-4">
