@@ -175,7 +175,7 @@ export default function Layout({ children, currentPageName }) {
         )}
       </AnimatePresence>
 
-      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen">
+      <main className="lg:ml-64 pt-16 lg:pt-0 min-h-screen overflow-x-hidden max-w-[100vw]">
         <MaintenanceBanner />
         {children}
         <GCashButton />
