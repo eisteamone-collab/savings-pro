@@ -175,6 +175,7 @@ export default function Dashboard() {
 
   if (!currentMember) return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-gray-200 border-t-gray-800 rounded-full animate-spin" /></div>;
 
+  const canWithdraw = currentMember.can_withdraw !== false;
   const withdrawValue = parseFloat(withdrawAmount) || 0;
   const charge = withdrawalCharge(withdrawValue > 0 ? withdrawValue : availableBalance, minAmount);
 
@@ -252,6 +253,10 @@ export default function Dashboard() {
               {pendingWithdrawal ? (
                 <div className="bg-white/20 rounded-2xl px-5 py-3 flex items-center gap-2 text-white text-sm font-semibold">
                   <Clock className="w-4 h-4" /> Withdrawal pending admin approval
+                </div>
+              ) : !canWithdraw ? (
+                <div className="bg-white/20 rounded-2xl px-5 py-3 flex items-center gap-2 text-white text-sm font-semibold">
+                  <Clock className="w-4 h-4" /> Withdrawal disabled by admin
                 </div>
               ) : (
                 <>

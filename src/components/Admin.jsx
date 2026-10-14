@@ -5,7 +5,7 @@ import {
   Eye, EyeOff, DollarSign, Trash2, RotateCcw, UserCog, GitBranch, Search,
   Download, Copy, Crown, ArrowRight, ChevronDown, X as XIcon, FileText,
   Key, Clock, Lock, Pencil, User, Save, Upload, Image as ImageIcon,
-  UserPlus, ArrowLeft, ShoppingBag, Store, Layers,
+  UserPlus, ArrowLeft, ShoppingBag, Store, Layers, Ban,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, updateRecord, createRecord, deleteRecord } from "../lib/useData";
@@ -533,6 +533,16 @@ export default function Admin() {
     } catch { toast.error("Failed to update"); }
   }
 
+  async function toggleMemberWithdraw(memberId, currentVal) {
+    try {
+      const { error } = await supabase.from("members").update({ can_withdraw: !currentVal }).eq("id", memberId);
+      if (error) throw error;
+      toast.success(`Withdrawal ${!currentVal ? "enabled" : "disabled"} for member`);
+    } catch (err) {
+      toast.error("Failed to update withdrawal access");
+    }
+  }
+
   async function toggleAutoRedeem() {
     const newVal = !autoRedeemEnabled;
     setAutoRedeemEnabled(newVal);
@@ -749,6 +759,7 @@ export default function Admin() {
                     {(isSupAdmin || isOwner) && <button onClick={() => setOverrideModal(m)} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors" title="Maintenance Override"><Clock className="w-4 h-4" /></button>}
 
                     {(isSupAdmin || isOwner) && <button onClick={() => setBalanceModal(m)} className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors" title="Edit Balance"><Wallet className="w-4 h-4" /></button>}
+                    {(isSupAdmin || isOwner) && <button onClick={() => toggleMemberWithdraw(m.id, m.can_withdraw !== false)} className={`p-2 rounded-lg transition-colors ${m.can_withdraw !== false ? "bg-emerald-100 text-emerald-600 hover:bg-emerald-200" : "bg-red-100 text-red-600 hover:bg-red-200"}`} title={m.can_withdraw !== false ? "Disable Withdrawal" : "Enable Withdrawal"}>{m.can_withdraw !== false ? <Wallet className="w-4 h-4" /> : <Ban className="w-4 h-4" />}</button>}
                     {isExpired && getDirectDownlineCount(m.id) === 0 && (
                       <button onClick={() => setConfirmDelete({ type: "member", id: m.id, name: m.full_name || m.username })} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors" title="Delete Account"><Trash2 className="w-4 h-4" /></button>
                     )}
