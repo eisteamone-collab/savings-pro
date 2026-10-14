@@ -5,13 +5,13 @@ import {
   Eye, EyeOff, DollarSign, Trash2, RotateCcw, UserCog, GitBranch, Search,
   Download, Copy, Crown, ArrowRight, ChevronDown, X as XIcon, FileText,
   Key, Clock, Lock, Pencil, User, Save, Upload, Image as ImageIcon,
-  UserPlus, ArrowLeft, ShoppingBag, Store,
+  UserPlus, ArrowLeft, ShoppingBag, Store, Layers,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, updateRecord, createRecord, deleteRecord } from "../lib/useData";
 import { supabase } from "../lib/supabase";
 import { getSessionMemberId } from "../lib/auth";
-import { money, formatDate, generateReferralCode, maintenanceStatus, formatTime, LEVEL_CONFIG, MAX_BONUS_LEVEL } from "../lib/helpers";
+import { money, formatDate, generateReferralCode, maintenanceStatus, formatTime, LEVEL_CONFIG, MAX_BONUS_LEVEL, setMaintenanceSeconds } from "../lib/helpers";
 import { distributePlacementCommissions } from "../lib/commissions";
 import { Button, Input, Label, Badge } from "./ui";
 import { Megaphone } from "lucide-react";
@@ -47,9 +47,12 @@ export default function Admin() {
   const [autoRedeemEnabled, setAutoRedeemEnabled] = useState(true);
   const [txSearch, setTxSearch] = useState("");
   const [tabVisibility, setTabVisibility] = useState({ monitoring: true, subadmin: true, terms: true, complan: true, product_conversion: true });
+  const [mlmEnabled, setMlmEnabled] = useState(true);
   const [announcementText, setAnnouncementText] = useState("");
   const [announcementEnabled, setAnnouncementEnabled] = useState(false);
   const [savingAnnouncement, setSavingAnnouncement] = useState(false);
+  const [maintenanceTimerHours, setMaintenanceTimerHours] = useState("12");
+  const [savingTimer, setSavingTimer] = useState(false);
   const [monitorMember, setMonitorMember] = useState(null);
   const [previewReceipt, setPreviewReceipt] = useState(null);
   const [signedUrls, setSignedUrls] = useState({});
@@ -62,7 +65,7 @@ export default function Admin() {
   const [overrideModal, setOverrideModal] = useState(null);
   const [balanceModal, setBalanceModal] = useState(null);
 
-  const { data: members = [] } = useTable("members");
+  const { data: members = [], refetch: refetchMembers } = useTable("members");
   const { data: codes = [], refetch: refetchCodes } = useTable("maintenance_codes");
   const { data: withdrawals = [] } = useTable("conversion_requests");
   const { data: gcashInfo = [] } = useTable("gcash_info");
@@ -81,12 +84,16 @@ export default function Admin() {
       complan: map.tab_complan_visible !== "false",
       product_conversion: map.tab_product_conversion_visible !== "false",
     });
+    setMlmEnabled(map.mlm_enabled !== "false");
     const minSetting = settings.find(s => s.setting_key === "withdrawal_minimum_amount");
     if (minSetting) setMinAmount(minSetting.setting_value);
     setAutoRedeemTime(map.auto_redeem_start_time || "");
     setAutoRedeemEnabled(map.auto_redeem_enabled !== "false");
     setAnnouncementText(map.announcement_text || "");
     setAnnouncementEnabled(map.announcement_enabled === "true");
+    const timerHours = map.maintenance_timer_hours || "12";
+    setMaintenanceTimerHours(timerHours);
+    setMaintenanceSeconds(parseFloat(timerHours) * 3600);
   }, [settings]);
 
   // Live countdown — re-render every second so maintenance timers tick down
@@ -149,12 +156,12 @@ export default function Admin() {
   const tabs = [
     { id: "members", label: `Members (${activeMembers.length})`, icon: Users, active: "from-amber-500 to-orange-600", inactive: "bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100" },
     { id: "pending", label: `Pending Placements${pendingMembers.length > 0 ? ` (${pendingMembers.length})` : ""}`, icon: Clock, active: "from-yellow-500 to-amber-600", inactive: "bg-yellow-50 text-yellow-700 border-yellow-200 hover:bg-yellow-100" },
-    { id: "codes", label: "Codes", icon: Ticket, active: "from-teal-500 to-emerald-600", inactive: "bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100" },
+    ...(mlmEnabled ? [{ id: "codes", label: "Codes", icon: Ticket, active: "from-teal-500 to-emerald-600", inactive: "bg-teal-50 text-teal-700 border-teal-200 hover:bg-teal-100" }] : []),
     { id: "withdrawals", label: `Withdrawals${pendingWithdrawals.length > 0 ? ` (${pendingWithdrawals.length})` : ""}`, icon: Wallet, active: "from-blue-500 to-indigo-600", inactive: "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" },
     { id: "history", label: "Transaction History", icon: FileText, active: "from-violet-500 to-purple-600", inactive: "bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100" },
-    ...(tabVisibility.product_conversion ? [{ id: "product_conversion", label: "Product Conversion", icon: ShoppingBag, active: "from-purple-500 to-fuchsia-600", inactive: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }] : []),
-    { id: "genealogy", label: "Genealogy", icon: GitBranch, active: "from-pink-500 to-rose-600", inactive: "bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100" },
-    ...(tabVisibility.monitoring ? [{ id: "monitoring", label: "Monitoring", icon: Eye, active: "from-cyan-500 to-sky-600", inactive: "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100" }] : []),
+    ...(mlmEnabled && tabVisibility.product_conversion ? [{ id: "product_conversion", label: "Product Conversion", icon: ShoppingBag, active: "from-purple-500 to-fuchsia-600", inactive: "bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100" }] : []),
+    ...(mlmEnabled ? [{ id: "genealogy", label: "Genealogy", icon: GitBranch, active: "from-pink-500 to-rose-600", inactive: "bg-pink-50 text-pink-700 border-pink-200 hover:bg-pink-100" }] : []),
+    ...(mlmEnabled && tabVisibility.monitoring ? [{ id: "monitoring", label: "Monitoring", icon: Eye, active: "from-cyan-500 to-sky-600", inactive: "bg-cyan-50 text-cyan-700 border-cyan-200 hover:bg-cyan-100" }] : []),
     { id: "gcash", label: "GCash", icon: Smartphone, active: "from-indigo-500 to-blue-600", inactive: "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100" },
     ...(deletedMembers.length > 0 ? [{ id: "deleted", label: `Deleted (${deletedMembers.length})`, icon: Trash2, active: "from-red-500 to-rose-600", inactive: "bg-red-50 text-red-700 border-red-200 hover:bg-red-100" }] : []),
     ...(canManageTabs ? [{ id: "roles", label: "Roles", icon: UserCog, active: "from-fuchsia-500 to-pink-600", inactive: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 hover:bg-fuchsia-100" }] : []),
@@ -182,7 +189,7 @@ export default function Admin() {
       .sort((a, b) => new Date(b.created_date || b.created_at) - new Date(a.created_date || a.created_at))[0];
     const lastWDate = lastWithdrawal ? new Date(lastWithdrawal.created_date || lastWithdrawal.created_at) : null;
     return txns
-      .filter(t => ["level_bonus", "referral_bonus", "adjustment"].includes(t.type) && (!lastWDate || new Date(t.created_date || t.created_at) > lastWDate))
+      .filter(t => ["level_bonus", "referral_bonus", "adjustment", "maintenance_code"].includes(t.type) && (!lastWDate || new Date(t.created_date || t.created_at) > lastWDate))
       .reduce((sum, t) => sum + Number(t.amount || 0), 0);
   }
 
@@ -526,6 +533,17 @@ export default function Admin() {
     } catch { toast.error("Failed to update"); }
   }
 
+  async function toggleMemberWithdraw(memberId, currentVal) {
+    try {
+      const { error } = await supabase.from("members").update({ can_withdraw: !currentVal }).eq("id", memberId);
+      if (error) throw error;
+      toast.success(`Withdrawal ${!currentVal ? "enabled" : "disabled"} for member`);
+      refetchMembers();
+    } catch (err) {
+      toast.error("Failed to update withdrawal access");
+    }
+  }
+
   async function toggleAutoRedeem() {
     const newVal = !autoRedeemEnabled;
     setAutoRedeemEnabled(newVal);
@@ -555,6 +573,33 @@ export default function Admin() {
       window.dispatchEvent(new CustomEvent("system_settings_changed"));
     } catch (err) { toast.error(err?.message || "Failed to save announcement"); }
     setSavingAnnouncement(false);
+  }
+
+  async function saveMaintenanceTimerHours() {
+    const hours = parseFloat(maintenanceTimerHours);
+    if (isNaN(hours) || hours <= 0) { toast.error("Enter a valid number of hours"); return; }
+    setSavingTimer(true);
+    try {
+      const existing = settings.find(s => s.setting_key === "maintenance_timer_hours");
+      if (existing) await updateRecord("system_settings", existing.id, { setting_value: String(hours) });
+      else await createRecord("system_settings", { setting_key: "maintenance_timer_hours", setting_value: String(hours) });
+      setMaintenanceSeconds(hours * 3600);
+      toast.success(`Maintenance timer set to ${hours} hour(s)`);
+      window.dispatchEvent(new CustomEvent("system_settings_changed"));
+    } catch { toast.error("Failed to update timer"); }
+    setSavingTimer(false);
+  }
+
+  async function toggleMlm() {
+    const newVal = !mlmEnabled;
+    setMlmEnabled(newVal);
+    try {
+      const existing = settings.find(s => s.setting_key === "mlm_enabled");
+      if (existing) await updateRecord("system_settings", existing.id, { setting_value: String(newVal) });
+      else await createRecord("system_settings", { setting_key: "mlm_enabled", setting_value: String(newVal) });
+      toast.success(`Multi-Level System ${newVal ? "enabled" : "disabled"}`);
+      window.dispatchEvent(new CustomEvent("system_settings_changed"));
+    } catch { toast.error("Failed to update"); }
   }
 
   async function toggleTab(key) {
@@ -674,16 +719,24 @@ export default function Admin() {
                   </div>
                   {/* Status badge */}
                   <div className="flex-shrink-0">
-                    {status.isGreen ? (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 rounded-lg">
-                        <div className="w-2 h-2 bg-green-500 rounded-full" />
-                        <span className="text-sm font-medium text-green-700">{formatTime(status.secondsLeft)}</span>
-                      </div>
+                    {mlmEnabled ? (
+                      status.isGreen ? (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-100 rounded-lg">
+                          <div className="w-2 h-2 bg-green-500 rounded-full" />
+                          <span className="text-sm font-medium text-green-700">{formatTime(status.secondsLeft)}</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 rounded-lg">
+                          <div className="w-2 h-2 bg-red-500 rounded-full" />
+                          <span className="text-sm font-medium text-red-700">{status.secondsLeft > 0 ? formatTime(status.secondsLeft) : "Expired"}</span>
+                        </div>
+                      )
                     ) : (
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-red-100 rounded-lg">
-                        <div className="w-2 h-2 bg-red-500 rounded-full" />
-                        <span className="text-sm font-medium text-red-700">{status.secondsLeft > 0 ? formatTime(status.secondsLeft) : "Expired"}</span>
-                      </div>
+                      <button onClick={() => { setRedeemModal(m); setRedeemCode(""); }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 rounded-lg hover:bg-blue-200 transition-colors cursor-pointer">
+                        <Ticket className="w-3.5 h-3.5 text-blue-600" />
+                        <span className="text-sm font-bold text-blue-600">{codes.filter(c => c.used_by_member_id === m.id).length}</span>
+                      </button>
                     )}
                   </div>
                   {/* Metrics */}
@@ -692,10 +745,12 @@ export default function Admin() {
                       <p className="text-xs text-gray-400">Balance</p>
                       <p className="text-sm font-bold text-gray-900">{money(getMemberBalance(m.id))}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs text-gray-400">Downlines</p>
-                      <p className="text-sm font-bold text-gray-900">{getDirectDownlineCount(m.id)}/8</p>
-                    </div>
+                    {mlmEnabled && (
+                      <div className="text-right">
+                        <p className="text-xs text-gray-400">Downlines</p>
+                        <p className="text-sm font-bold text-gray-900">{getDirectDownlineCount(m.id)}/8</p>
+                      </div>
+                    )}
                   </div>
                   {/* Action pills */}
                   <div className="flex items-center gap-1.5 flex-shrink-0">
@@ -705,6 +760,15 @@ export default function Admin() {
                     {(isSupAdmin || isOwner) && <button onClick={() => setOverrideModal(m)} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors" title="Maintenance Override"><Clock className="w-4 h-4" /></button>}
 
                     {(isSupAdmin || isOwner) && <button onClick={() => setBalanceModal(m)} className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors" title="Edit Balance"><Wallet className="w-4 h-4" /></button>}
+                    {(isSupAdmin || isOwner) && (
+                      <button
+                        onClick={() => toggleMemberWithdraw(m.id, m.can_withdraw !== false)}
+                        className={`relative w-11 h-6 rounded-full transition-colors duration-200 flex-shrink-0 ${m.can_withdraw !== false ? "bg-emerald-500" : "bg-gray-300"}`}
+                        title={m.can_withdraw !== false ? "Disable Withdrawal" : "Enable Withdrawal"}
+                      >
+                        <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow-sm transition-transform duration-200 ${m.can_withdraw !== false ? "translate-x-5" : "translate-x-0"}`} />
+                      </button>
+                    )}
                     {isExpired && getDirectDownlineCount(m.id) === 0 && (
                       <button onClick={() => setConfirmDelete({ type: "member", id: m.id, name: m.full_name || m.username })} className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors" title="Delete Account"><Trash2 className="w-4 h-4" /></button>
                     )}
@@ -1440,6 +1504,71 @@ export default function Admin() {
               <div className="flex-1"><Label>Start time</Label><Input type="time" value={autoRedeemTime} onChange={e => setAutoRedeemTime(e.target.value)} /></div>
               <Button onClick={saveAutoRedeemTime} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white">Save</Button>
             </div>
+          </div>
+          <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2"><Layers className="w-5 h-5 text-purple-500" /> Multi-Level System</h2>
+            <p className="text-sm text-gray-500 mb-4">Master switch for all MLM features: genealogy, commission plan, withdrawals, wallets, transaction history, maintenance timer for codes, and referral link. When off, these are hidden from both member accounts and this admin panel.</p>
+            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 mb-4">
+              <div>
+                <span className="font-medium text-gray-700">Multi-Level System Enabled</span>
+                <p className="text-xs text-gray-400">Toggles genealogy, complan, commissions, withdraw buttons, withdraw wallets, and admin MLM tabs.</p>
+              </div>
+              <button onClick={toggleMlm}
+                className={`relative w-12 h-6 rounded-full transition-colors ${mlmEnabled ? "bg-green-500" : "bg-gray-300"}`}>
+                <div className={`absolute top-0.5 w-5 h-5 bg-white rounded-full transition-transform ${mlmEnabled ? "translate-x-6" : "translate-x-0.5"}`} />
+              </button>
+            </div>
+
+            {/* Withdrawal Charge */}
+            <div className="border-t border-gray-100 pt-4 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Wallet className="w-4 h-4 text-blue-500" />
+                <span className="font-medium text-gray-700">Withdrawal Charge</span>
+              </div>
+              {mlmEnabled ? (
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p>• ₱{parseFloat(minAmount || 0).toLocaleString()}–₱999: flat <span className="font-bold">₱10</span> charge</p>
+                  <p>• ₱1,000+: <span className="font-bold">₱15 per ₱1,000</span> charged</p>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">No charge — Multi-Level System is off.</p>
+              )}
+            </div>
+
+            {/* Maintenance Timer Duration */}
+            <div className="border-t border-gray-100 pt-4 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Clock className="w-4 h-4 text-amber-500" />
+                <span className="font-medium text-gray-700">Maintenance Timer Duration</span>
+              </div>
+              <p className="text-xs text-gray-400 mb-3">How long a member stays green after redeeming a code (in hours).</p>
+              <div className="flex gap-3 items-end">
+                <div className="flex-1"><Label>Hours</Label><Input type="number" min="1" step="0.5" value={maintenanceTimerHours} onChange={e => setMaintenanceTimerHours(e.target.value)} /></div>
+                <Button onClick={saveMaintenanceTimerHours} disabled={savingTimer} className="bg-gradient-to-r from-amber-500 to-orange-600 text-white">Save</Button>
+              </div>
+            </div>
+
+          </div>
+          <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-1 flex items-center gap-2"><Megaphone className="w-5 h-5 text-amber-500" /> Announcement Banner</h2>
+            <p className="text-sm text-gray-500 mb-4">Banner text shown above the member dashboard. Toggle visibility before saving.</p>
+            <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 mb-3">
+              <span className="text-sm font-medium text-gray-700">{announcementEnabled ? "Visible to users" : "Hidden from users"}</span>
+              <button onClick={() => setAnnouncementEnabled(v => !v)}
+                className={`relative w-12 h-6 rounded-full transition-colors ${announcementEnabled ? "bg-green-500" : "bg-gray-300"}`}>
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform ${announcementEnabled ? "translate-x-6" : ""}`} />
+              </button>
+            </div>
+            <textarea
+              value={announcementText}
+              onChange={e => setAnnouncementText(e.target.value)}
+              rows={3}
+              placeholder="Enter announcement text..."
+              className="w-full rounded-xl border border-gray-200 px-4 py-3 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 resize-none"
+            />
+            <Button onClick={saveAnnouncement} disabled={savingAnnouncement} className="mt-3 bg-gradient-to-r from-amber-500 to-orange-600 text-white">
+              {savingAnnouncement ? "Saving..." : "Save Announcement"}
+            </Button>
           </div>
           <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-6">
             <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2"><Settings className="w-5 h-5 text-gray-500" /> Sidebar Tab Visibility</h2>

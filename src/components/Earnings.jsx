@@ -14,6 +14,19 @@ export default function Earnings() {
   const { currentMember } = useCurrentMember(members);
 
   const productConversionVisible = settings.find(s => s.setting_key === "tab_product_conversion_visible")?.setting_value !== "false";
+  const mlm_enabled = settings.find(s => s.setting_key === "mlm_enabled")?.setting_value !== "false";
+
+  if (!mlm_enabled) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-100 p-12 text-center">
+          <Wallet className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Earnings Unavailable</h1>
+          <p className="text-gray-500">The multi-level system is currently disabled. Please check back later.</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!currentMember) {
     return (
@@ -39,7 +52,7 @@ export default function Earnings() {
   const lastWDate = lastWithdrawal ? new Date(lastWithdrawal.created_date || lastWithdrawal.created_at) : null;
 
   const availableBalance = myTx
-    .filter(t => ["level_bonus", "referral_bonus", "adjustment"].includes(t.type) && (!lastWDate || new Date(t.created_date || t.created_at) > lastWDate))
+    .filter(t => ["level_bonus", "referral_bonus", "adjustment", "maintenance_code"].includes(t.type) && (!lastWDate || new Date(t.created_date || t.created_at) > lastWDate))
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
   const productWalletBalance = myTx

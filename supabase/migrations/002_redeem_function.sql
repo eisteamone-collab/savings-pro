@@ -16,8 +16,17 @@ begin
   set is_used=true,used_by_member_id=p_member_id,used_at=now()
   where id=c.id;
 
-  insert into public.code_redemption_history (code_id, code, redeemed_by_member_id, redeemed_by_username, store_member_id, redeemed_at, status)
-    values (c.id, c.code, p_member_id, m.username, null, now(), 'completed');
+  insert into public.code_redemption_history (code_id, code, amount, redeemed_by_member_id, redeemed_by_username, store_member_id, redeemed_at, status)
+    values (c.id, c.code, c.amount, p_member_id, m.username, null, now(), 'completed');
+
+  -- Add the code amount to the redeeming member's balance
+  if coalesce(c.amount, 0) > 0 then
+    update public.members
+    set available_balance=available_balance+c.amount,
+        total_earnings=total_earnings+c.amount,
+        updated_at=now()
+    where id=p_member_id;
+  end if;
 
   update public.members
   set maintenance_timer_seconds=null,maintenance_timer_set_at=null,updated_at=now()

@@ -15,7 +15,7 @@ export function storeQuotaSummary(storeId, quotas, codes) {
 }
 
 // Generate maintenance codes on behalf of a store (optionally designated to a username).
-export async function generateStoreCodes(storeId, count, assignedUsername) {
+export async function generateStoreCodes(storeId, count, assignedUsername, amount) {
   const records = [];
   for (let i = 0; i < count; i++) {
     const base = "MAINT-" + generateReferralCode();
@@ -24,6 +24,7 @@ export async function generateStoreCodes(storeId, count, assignedUsername) {
       is_used: false,
       assigned_username: assignedUsername || null,
       generated_by_store_id: storeId,
+      amount: amount || 0,
     });
   }
   let { error } = await supabase.from("maintenance_codes").insert(records);
