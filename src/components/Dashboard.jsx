@@ -202,7 +202,7 @@ export default function Dashboard() {
 
   if (!currentMember) return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-gray-200 border-t-gray-800 rounded-full animate-spin" /></div>;
 
-  const canWithdraw = mlmEnabled && withdrawalAccess;
+  const canWithdraw = withdrawalAccess;
   const withdrawValue = parseFloat(withdrawAmount) || 0;
   const charge = withdrawalCharge(withdrawValue > 0 ? withdrawValue : availableBalance, minAmount);
 
