@@ -9,6 +9,7 @@ import { redeemCode } from "../lib/redeem";
 import { money, formatDate, withdrawalCharge, LEVEL_CONFIG, MAX_BONUS_LEVEL, maintenanceStatus } from "../lib/helpers";
 import { Button, Badge } from "./ui";
 import AnnouncementBanner from "./AnnouncementBanner";
+import MaintenanceTimerBanner from "./MaintenanceTimerBanner";
 
 export default function Dashboard() {
   const [showHistory, setShowHistory] = useState(false);
@@ -317,6 +318,9 @@ export default function Dashboard() {
                 <p className="text-sm text-emerald-50">Paki-Paste po sa box sa ibaba ang iyong eksaktong Code at i-click ang "Redeem Code" button</p>
               </div>
             </div>
+          </div>
+          <div className="px-6 pt-4">
+            <MaintenanceTimerBanner member={currentMember} allCodes={allCodes} />
           </div>
           <div className="px-6 pt-4 grid grid-cols-5 gap-3">
             {LEVEL_CONFIG.map(l => (
