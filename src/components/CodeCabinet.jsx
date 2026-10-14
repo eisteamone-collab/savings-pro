@@ -1,17 +1,15 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Archive, Copy, KeyRound, ArrowRight, CheckCircle2, Clock, History, DollarSign } from "lucide-react";
+import { Archive, Copy, KeyRound, ArrowRight, CheckCircle2, History, DollarSign } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, useCurrentMember } from "../lib/useData";
 import { supabase } from "../lib/supabase";
 import { redeemCode } from "../lib/redeem";
-import { formatDate, formatTime, maintenanceStatus } from "../lib/helpers";
+import { formatDate } from "../lib/helpers";
 import { Button, Badge } from "./ui";
 import AutoRedeemPanel from "./AutoRedeemPanel";
 import WeeklyRedeemMonitor from "./WeeklyRedeemMonitor";
-
-const REDEEM_UNLOCK_THRESHOLD = 7200; // redeem enabled when 12h maintenance countdown has ≤2h left
 
 export default function CodeCabinet() {
   const nav = useNavigate();
@@ -21,13 +19,6 @@ export default function CodeCabinet() {
   const { data: systemSettings = [] } = useTable("system_settings");
   const { currentMember } = useCurrentMember(members);
   const [redeemBusyId, setRedeemBusyId] = useState(null);
-  const [now, setNow] = useState(Date.now());
-
-  // Tick every second for countdown timers
-  useEffect(() => {
-    const t = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(t);
-  }, []);
 
   // Real-time: refetch when codes change
   useEffect(() => {
@@ -69,16 +60,7 @@ export default function CodeCabinet() {
     toast.success("Code copied! Paste it in the Maintenance Code box on your Dashboard.");
   }
 
-  const maintenance = currentMember ? maintenanceStatus(currentMember, codes) : null;
-  // Redeem is locked unless: never redeemed before, maintenance expired, or ≤1h left on the 12h countdown
-  const canRedeem = !maintenance || !maintenance.isGreen || maintenance.secondsLeft <= REDEEM_UNLOCK_THRESHOLD;
-  const lockSeconds = maintenance && maintenance.isGreen ? maintenance.secondsLeft : 0;
-
   async function handleRedeem(code) {
-    if (!canRedeem) {
-      toast.error(`Redeem unlocks in ${formatTime(lockSeconds - REDEEM_UNLOCK_THRESHOLD)} when 2 hours remain.`);
-      return;
-    }
     setRedeemBusyId(code.id);
     try {
       const result = await redeemCode(code, currentMember, members, codes);
@@ -99,7 +81,7 @@ export default function CodeCabinet() {
         </div>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Code Cabinet</h1>
-          <p className="text-gray-500">Codes assigned to you by the store. Redemption unlocks when your 12-hour maintenance cycle has 2 hours remaining.</p>
+          <p className="text-gray-500">Codes assigned to you by the store. Click Redeem to use a code anytime.</p>
         </div>
       </motion.div>
 
@@ -151,11 +133,6 @@ export default function CodeCabinet() {
                   <p className="font-mono font-bold text-gray-900">{c.code}</p>
                   <p className="text-xs text-emerald-600 font-semibold mt-0.5">Amount: ₱{Number(c.amount || 0).toLocaleString()}</p>
                   <p className="text-xs text-gray-400 mt-0.5">Received {formatDate(c.created_at, "MMM d, yyyy h:mm a")}</p>
-                  {!canRedeem && (
-                    <p className="text-xs font-semibold text-orange-600 mt-1 flex items-center gap-1">
-                      <Clock className="w-3 h-3" /> Unlocks in {formatTime(lockSeconds - REDEEM_UNLOCK_THRESHOLD)}
-                    </p>
-                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <Button size="sm" variant="outline" onClick={() => copyCode(c.code)}>
@@ -163,13 +140,11 @@ export default function CodeCabinet() {
                   </Button>
                   <Button
                     size="sm"
-                    disabled={!canRedeem || redeemBusyId === c.id}
-                    className={!canRedeem
-                      ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                      : "!bg-blue-600 hover:!bg-blue-700 !text-white"}
+                    disabled={redeemBusyId === c.id}
+                    className="!bg-blue-600 hover:!bg-blue-700 !text-white"
                     onClick={() => handleRedeem(c)}
                   >
-                    {redeemBusyId === c.id ? "Redeeming..." : "Redeem"} {canRedeem && <ArrowRight className="w-3.5 h-3.5" />}
+                    {redeemBusyId === c.id ? "Redeeming..." : "Redeem"} <ArrowRight className="w-3.5 h-3.5" />
                   </Button>
                 </div>
               </div>
