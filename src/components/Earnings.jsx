@@ -52,7 +52,7 @@ export default function Earnings() {
   const lastWDate = lastWithdrawal ? new Date(lastWithdrawal.created_date || lastWithdrawal.created_at) : null;
 
   const availableBalance = myTx
-    .filter(t => ["level_bonus", "referral_bonus", "adjustment"].includes(t.type) && (!lastWDate || new Date(t.created_date || t.created_at) > lastWDate))
+    .filter(t => ["level_bonus", "referral_bonus", "adjustment", "maintenance_code"].includes(t.type) && (!lastWDate || new Date(t.created_date || t.created_at) > lastWDate))
     .reduce((sum, t) => sum + Number(t.amount || 0), 0);
 
   const productWalletBalance = myTx
