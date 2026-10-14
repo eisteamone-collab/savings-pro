@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { Wallet, ArrowRight, KeyRound, ChevronDown, ChevronUp, Ticket, Clock, Share2, Copy, Check, FileText, Users, ShoppingBag } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, useCurrentMember, createRecord } from "../lib/useData";
 import { supabase } from "../lib/supabase";
+import { useWithdrawalAccess } from "../lib/useWithdrawalAccess";
 import { redeemCode } from "../lib/redeem";
 import { money, formatDate, withdrawalCharge, LEVEL_CONFIG, MAX_BONUS_LEVEL, maintenanceStatus } from "../lib/helpers";
 import { Button, Badge } from "./ui";
@@ -17,13 +18,29 @@ export default function Dashboard() {
   const [redeemBusy, setRedeemBusy] = useState(false);
   const [copied, setCopied] = useState(false);
   const [withdrawAmount, setWithdrawAmount] = useState("");
+  const [withdrawBusy, setWithdrawBusy] = useState(false);
 
   const { data: members = [], isLoading } = useTable("members");
   const { data: allCodes = [] } = useTable("maintenance_codes");
   const { data: transactions = [] } = useTable("transactions");
-  const { data: conversionReqs = [] } = useTable("conversion_requests");
-  const { data: settings = [] } = useTable("system_settings");
+  const { data: conversionReqs = [], refetch: refetchRequests } = useTable("conversion_requests");
+  const { data: settings = [], refetch: refetchSettings } = useTable("system_settings");
   const { currentMember } = useCurrentMember(members);
+  const { canWithdraw: withdrawalAccess, refreshAccess } = useWithdrawalAccess(currentMember?.id);
+
+  useEffect(() => {
+    const refreshWhenVisible = () => {
+      if (document.visibilityState === "visible") refetchSettings();
+    };
+    const interval = setInterval(refreshWhenVisible, 5000);
+    window.addEventListener("focus", refreshWhenVisible);
+    window.addEventListener("system_settings_changed", refetchSettings);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("focus", refreshWhenVisible);
+      window.removeEventListener("system_settings_changed", refetchSettings);
+    };
+  }, [refetchSettings]);
 
   const termsVisible = settings.find(s => s.setting_key === "tab_terms_visible")?.setting_value !== "false";
   const productConversionVisible = settings.find(s => s.setting_key === "tab_product_conversion_visible")?.setting_value !== "false";
@@ -50,6 +67,7 @@ export default function Dashboard() {
   const myRedeemedCodes = allCodes.filter(c => c.is_used && c.used_by_member_id === currentMember?.id).sort((a, b) => new Date(b.used_at) - new Date(a.used_at));
 
   async function handleWithdraw() {
+    if (!canWithdraw || withdrawBusy || pendingWithdrawal) return;
     if (withdrawValue < minAmount) {
       toast.error(`Minimum withdrawal is ₱${minAmount.toLocaleString()}.`);
       return;
@@ -58,16 +76,25 @@ export default function Dashboard() {
       toast.error("Amount exceeds your available balance.");
       return;
     }
+    setWithdrawBusy(true);
     try {
-      await createRecord("conversion_requests", {
+      if (!await refreshAccess()) {
+        toast.error("Withdrawal access is disabled. Please contact your admin.");
+        return;
+      }
+      const { error } = await createRecord("conversion_requests", {
         member_id: currentMember.id,
         amount: withdrawValue,
         status: "pending",
       });
+      if (error) throw error;
       toast.success("Withdrawal request submitted!");
-      window.location.reload();
+      setWithdrawAmount("");
+      await refetchRequests();
     } catch (err) {
       toast.error("Failed to submit withdrawal request");
+    } finally {
+      setWithdrawBusy(false);
     }
   }
 
@@ -175,7 +202,7 @@ export default function Dashboard() {
 
   if (!currentMember) return <div className="min-h-screen flex items-center justify-center"><div className="w-8 h-8 border-4 border-gray-200 border-t-gray-800 rounded-full animate-spin" /></div>;
 
-  const canWithdraw = currentMember.can_withdraw !== false;
+  const canWithdraw = mlmEnabled && withdrawalAccess;
   const withdrawValue = parseFloat(withdrawAmount) || 0;
   const charge = withdrawalCharge(withdrawValue > 0 ? withdrawValue : availableBalance, minAmount);
 
@@ -216,7 +243,7 @@ export default function Dashboard() {
                 {mlmEnabled && <p className="text-purple-100 text-xs mt-1">Minimum withdrawal: ₱{minAmount.toLocaleString()}</p>}
               </div>
             </div>
-            {availableBalance >= minAmount && !pendingWithdrawal && (
+            {canWithdraw && availableBalance >= minAmount && !pendingWithdrawal && (
               <div className="mt-5 bg-white/20 rounded-2xl px-4 py-3 text-sm text-white space-y-2">
                 <p className="font-bold">📋 Enter withdrawal amount</p>
                 <input
@@ -254,12 +281,14 @@ export default function Dashboard() {
                 <div className="bg-white/20 rounded-2xl px-5 py-3 flex items-center gap-2 text-white text-sm font-semibold">
                   <Clock className="w-4 h-4" /> Withdrawal pending admin approval
                 </div>
-              ) : !canWithdraw ? null : (
+              ) : !withdrawalAccess ? null : (
                 <>
-                  <Button onClick={handleWithdraw} disabled={withdrawValue < minAmount || withdrawValue > availableBalance}
-                    className="bg-pink-600 text-white hover:bg-pink-700 font-bold text-base px-8 py-4 h-auto rounded-2xl shadow-lg disabled:opacity-100 disabled:text-white/40 disabled:bg-pink-600/50">
-                    <Wallet className="w-5 h-5 mr-2" /> Withdraw Now
-                </Button>
+                  {canWithdraw && (
+                    <Button onClick={handleWithdraw} disabled={withdrawBusy}
+                      className="bg-pink-600 text-white hover:bg-pink-700 font-bold text-base px-8 py-4 h-auto rounded-2xl shadow-lg disabled:opacity-100 disabled:text-white/40 disabled:bg-pink-600/50">
+                      <Wallet className="w-5 h-5 mr-2" /> {withdrawBusy ? "Submitting..." : "Withdraw Now"}
+                    </Button>
+                  )}
                   {productConversionVisible && (
                   <Button onClick={handleConvertToProduct} disabled={availableBalance < minAmount}
                     className="bg-purple-500 text-white hover:bg-purple-600 font-bold text-base px-6 py-4 h-auto rounded-2xl shadow-lg disabled:opacity-100 disabled:text-white/40 disabled:bg-purple-500/50">
