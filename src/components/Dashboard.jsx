@@ -204,7 +204,7 @@ export default function Dashboard() {
 
   const canWithdraw = withdrawalAccess;
   const withdrawValue = parseFloat(withdrawAmount) || 0;
-  const charge = withdrawalCharge(withdrawValue > 0 ? withdrawValue : availableBalance, minAmount);
+  const charge = mlmEnabled ? withdrawalCharge(withdrawValue > 0 ? withdrawValue : availableBalance, minAmount) : 0;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-2 pb-8">

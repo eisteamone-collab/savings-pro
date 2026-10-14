@@ -1519,6 +1519,22 @@ export default function Admin() {
               </button>
             </div>
 
+            {/* Withdrawal Charge */}
+            <div className="border-t border-gray-100 pt-4 mb-4">
+              <div className="flex items-center gap-2 mb-1">
+                <Wallet className="w-4 h-4 text-blue-500" />
+                <span className="font-medium text-gray-700">Withdrawal Charge</span>
+              </div>
+              {mlmEnabled ? (
+                <div className="text-xs text-gray-600 space-y-1">
+                  <p>• ₱{parseFloat(minAmount || 0).toLocaleString()}–₱999: flat <span className="font-bold">₱10</span> charge</p>
+                  <p>• ₱1,000+: <span className="font-bold">₱15 per ₱1,000</span> charged</p>
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">No charge — Multi-Level System is off.</p>
+              )}
+            </div>
+
             {/* Maintenance Timer Duration */}
             <div className="border-t border-gray-100 pt-4 mb-4">
               <div className="flex items-center gap-2 mb-1">
