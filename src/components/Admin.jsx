@@ -65,7 +65,7 @@ export default function Admin() {
   const [overrideModal, setOverrideModal] = useState(null);
   const [balanceModal, setBalanceModal] = useState(null);
 
-  const { data: members = [] } = useTable("members");
+  const { data: members = [], refetch: refetchMembers } = useTable("members");
   const { data: codes = [], refetch: refetchCodes } = useTable("maintenance_codes");
   const { data: withdrawals = [] } = useTable("conversion_requests");
   const { data: gcashInfo = [] } = useTable("gcash_info");
@@ -538,6 +538,7 @@ export default function Admin() {
       const { error } = await supabase.from("members").update({ can_withdraw: !currentVal }).eq("id", memberId);
       if (error) throw error;
       toast.success(`Withdrawal ${!currentVal ? "enabled" : "disabled"} for member`);
+      refetchMembers();
     } catch (err) {
       toast.error("Failed to update withdrawal access");
     }
