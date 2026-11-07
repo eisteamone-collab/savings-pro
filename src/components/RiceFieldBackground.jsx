@@ -1,10 +1,10 @@
 import React from "react";
 
 const BG_URL =
-  "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/6a9bb420c_images.jpg";
+  "https://media.base44.com/images/public/6aee8487af28936741863e08/9d1a95ef4_pngtree-seedlings-growing-from-stacks-of-money-symbolizing-savings-and-environmental-growth-image_16443501.jpg";
 
 /**
- * Fixed full-screen rice-field background with a readability overlay.
+ * Fixed full-screen background shared by every page (single source of truth).
  * `dark` increases the overlay for screens that place light text directly on it.
  */
 export default function RiceFieldBackground({ dark = false }) {

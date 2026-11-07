@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { User, ArrowRight, Copy, Check, Save } from "lucide-react";
+import { User, ArrowRight, Copy, Check, Save, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, useCurrentMember, updateRecord } from "../lib/useData";
+import { saveLogin } from "../lib/savedLogin";
 import { Button, Input, Label } from "./ui";
 
 export default function Profile() {
@@ -13,6 +14,7 @@ export default function Profile() {
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState(null);
   const [initialized, setInitialized] = useState(false);
+  const [showPwd, setShowPwd] = useState(false);
 
   useEffect(() => {
     if (currentMember && !initialized) {
@@ -50,8 +52,12 @@ export default function Profile() {
   async function save() {
     setSaving(true);
     const updates = { ...form };
-    if (!updates.password) delete updates.password;    try {
+    // age is an integer column: an empty string makes the whole update fail
+    if (!updates.age) updates.age = null;
+    if (!updates.password) delete updates.password;
+    try {
       await updateRecord("members", currentMember.id, updates);
+      if (updates.password) saveLogin(currentMember.username, updates.password);
       toast.success("Profile updated successfully!");
       window.location.reload();
     } catch {
@@ -178,7 +184,12 @@ export default function Profile() {
         </div>
         <div>
           <Label className="text-white">New Password</Label>
-          <Input value={form.password} onChange={update("password")} type="password" placeholder="Leave blank to keep current password" className="bg-white border-gray-300 text-gray-900 placeholder-gray-400" />
+          <div className="relative">
+            <Input value={form.password} onChange={update("password")} type={showPwd ? "text" : "password"} placeholder="Leave blank to keep current password" className="bg-white border-gray-300 text-gray-900 placeholder-gray-400 pr-12" />
+            <button type="button" onClick={() => setShowPwd(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-800 transition-colors" title={showPwd ? "Hide password" : "Show password"} aria-label={showPwd ? "Hide password" : "Show password"}>
+              {showPwd ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+            </button>
+          </div>
         </div>
       </motion.div>
 

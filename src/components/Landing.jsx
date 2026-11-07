@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, LogIn, Crown } from "lucide-react";
 import { Button } from "./ui";
+import RiceFieldBackground from "./RiceFieldBackground";
 
 const STATS = [
   { label: "Membership Fee", value: "Free" },
@@ -13,19 +14,11 @@ const STATS = [
 
 const LOGO_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/ae16dfe62_Firefly2.png";
 const POSTER_URL = "https://media.base44.com/images/public/6ace49faeb6f2fe9616499fd/7c2cea0a6_ModernMarketingTrifoldBrochure.png";
-const BG_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/6a9bb420c_images.jpg";
 
 export default function Landing() {
   return (
-    <div
-      className="min-h-screen w-full text-white overflow-x-hidden relative"
-      style={{
-        backgroundImage: `linear-gradient(to bottom right, rgba(17,17,17,0.45), rgba(26,22,14,0.5)), url('${BG_URL}')`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
-    >
+    <div className="min-h-screen w-full text-white overflow-x-hidden relative">
+      <RiceFieldBackground dark />
       <nav className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-xl border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
