@@ -5,7 +5,7 @@ import {
   Eye, EyeOff, DollarSign, Trash2, RotateCcw, UserCog, GitBranch, Search,
   Download, Copy, Crown, ArrowRight, ChevronDown, X as XIcon, FileText,
   Key, Clock, Lock, Pencil, User, Save, Upload, Image as ImageIcon,
-  UserPlus, ArrowLeft, ShoppingBag, Store, Layers,
+  UserPlus, ArrowLeft, ShoppingBag, Store, Layers, Bell,
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, updateRecord, createRecord, deleteRecord } from "../lib/useData";
@@ -21,6 +21,7 @@ import AdminStoreTab from "./AdminStoreTab";
 import AdminTransactionHistory from "./AdminTransactionHistory";
 import MaintenanceOverrideModal from "./MaintenanceOverrideModal";
 import EditBalanceModal from "./EditBalanceModal";
+import SendNotificationModal from "./SendNotificationModal";
 
 export default function Admin() {
   const [tab, setTab] = useState("members");
@@ -64,6 +65,7 @@ export default function Admin() {
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [overrideModal, setOverrideModal] = useState(null);
   const [balanceModal, setBalanceModal] = useState(null);
+  const [notifyModal, setNotifyModal] = useState(null);
 
   const { data: members = [], refetch: refetchMembers } = useTable("members");
   const { data: codes = [], refetch: refetchCodes } = useTable("maintenance_codes");
@@ -757,6 +759,7 @@ export default function Admin() {
                     <button onClick={() => setSponsorModal({ member: m, newSponsorId: "" })} className="p-2 bg-yellow-100 text-yellow-600 rounded-lg hover:bg-yellow-200 transition-colors" title="Change Sponsor"><GitBranch className="w-4 h-4" /></button>
                     <button onClick={() => setEditMember({ ...m })} className="p-2 bg-purple-100 text-purple-600 rounded-lg hover:bg-purple-200 transition-colors" title="Edit Member"><Pencil className="w-4 h-4" /></button>
                     <button onClick={() => { setRedeemModal(m); setRedeemCode(""); }} className="p-2 bg-teal-100 text-teal-600 rounded-lg hover:bg-teal-200 transition-colors" title="Redeem Code"><Key className="w-4 h-4" /></button>
+                    <button onClick={() => setNotifyModal(m)} className="p-2 bg-sky-100 text-sky-600 rounded-lg hover:bg-sky-200 transition-colors" title="Send Notification"><Bell className="w-4 h-4" /></button>
                     {(isSupAdmin || isOwner) && <button onClick={() => setOverrideModal(m)} className="p-2 bg-blue-100 text-blue-600 rounded-lg hover:bg-blue-200 transition-colors" title="Maintenance Override"><Clock className="w-4 h-4" /></button>}
 
                     {(isSupAdmin || isOwner) && <button onClick={() => setBalanceModal(m)} className="p-2 bg-green-100 text-green-600 rounded-lg hover:bg-green-200 transition-colors" title="Edit Balance"><Wallet className="w-4 h-4" /></button>}
@@ -1937,6 +1940,13 @@ export default function Admin() {
           currentBalance={getMemberBalance(balanceModal.id)}
           onClose={() => setBalanceModal(null)}
           onApplied={() => window.location.reload()}
+        />
+      )}
+
+      {notifyModal && (
+        <SendNotificationModal
+          member={notifyModal}
+          onClose={() => setNotifyModal(null)}
         />
       )}
     </div>
