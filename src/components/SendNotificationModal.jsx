@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
 import { getSessionMemberId } from "../lib/auth";
 import { NOTIFICATION_SENDER } from "../lib/notifications";
+import MemberNotificationsPanel from "./MemberNotificationsPanel";
 
 export default function SendNotificationModal({ member, onClose, onSent }) {
   const [message, setMessage] = useState("");
@@ -50,7 +51,7 @@ export default function SendNotificationModal({ member, onClose, onSent }) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           onClick={e => e.stopPropagation()}
-          className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+          className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col"
         >
           <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
             <div className="flex items-center gap-3">
@@ -67,6 +68,7 @@ export default function SendNotificationModal({ member, onClose, onSent }) {
             </button>
           </div>
 
+          <div className="flex-1 overflow-y-auto">
           <div className="px-6 py-5 space-y-4">
             <div className="flex items-center gap-2 rounded-xl border border-sky-100 bg-sky-50 px-4 py-3">
               <Headset className="w-4 h-4 text-sky-600 shrink-0" />
@@ -86,6 +88,9 @@ export default function SendNotificationModal({ member, onClose, onSent }) {
               />
               <p className="text-xs text-gray-400 text-right mt-1">{message.length}/1000</p>
             </div>
+          </div>
+
+            <MemberNotificationsPanel member={member} />
           </div>
 
           <div className="flex gap-3 px-6 py-5 border-t border-gray-100 bg-gray-50">
