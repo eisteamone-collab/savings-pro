@@ -56,12 +56,10 @@ export async function redeemCode(codeRecord, currentMember, allMembers, allCodes
   ]);
 
   const freshMember = (freshMembers || allMembers).find(m => m.id === currentMember.id);
-  if (freshMember && freshMember.status !== "approved") {
-    return { message: "Code redeemed. You must be placed under an upline before commissions are distributed." };
+  if (!freshMember || freshMember.status === "approved") {
+    await distributeUplineBonuses(currentMember, freshMembers || allMembers, freshCodes || allCodes, codeRecord);
   }
-
-  await distributeUplineBonuses(currentMember, freshMembers || allMembers, freshCodes || allCodes, codeRecord);
-  return { message: "Code redeemed successfully! Upline bonuses distributed." };
+  return { message: `Successfully Redeemed: ${codeRecord.code}` };
 }
 
 // Redeem a code on behalf of a specific member (used by Admin and Store)
@@ -117,12 +115,10 @@ export async function redeemCodeForMember(codeRecord, member, allMembers, allCod
   const allC = freshCodes || allCodes;
 
   const freshMember = allM.find(m => m.id === member.id);
-  if (freshMember && freshMember.status !== "approved") {
-    return { message: "Code redeemed. Member must be placed under an upline before commissions are distributed." };
+  if (!freshMember || freshMember.status === "approved") {
+    await distributeUplineBonuses(member, allM, allC, codeRecord);
   }
-
-  await distributeUplineBonuses(member, allM, allC, codeRecord);
-  return { message: "Code redeemed successfully! Upline bonuses distributed." };
+  return { message: `Successfully Redeemed: ${codeRecord.code}` };
 }
 
 async function distributeUplineBonuses(member, allMembers, allCodes, codeRecord) {

@@ -137,7 +137,7 @@ export default function Dashboard() {
       const result = await redeemCode(codeRecord, currentMember, members, allCodes);
       toast.success(result.message);
       setCode("");
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 2500);
     } catch (err) {
       toast.error(err.message || "Failed to redeem code");
     }
