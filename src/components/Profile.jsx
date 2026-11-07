@@ -50,8 +50,12 @@ export default function Profile() {
   async function save() {
     setSaving(true);
     const updates = { ...form };
-    if (!updates.password) delete updates.password;    try {
+    // age is an integer column: an empty string makes the whole update fail
+    if (!updates.age) updates.age = null;
+    if (!updates.password) delete updates.password;
+    try {
       await updateRecord("members", currentMember.id, updates);
+      if (updates.password) localStorage.setItem("saved_login", JSON.stringify({ username: currentMember.username, password: updates.password }));
       toast.success("Profile updated successfully!");
       window.location.reload();
     } catch {

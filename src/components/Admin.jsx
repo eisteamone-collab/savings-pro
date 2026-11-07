@@ -416,6 +416,8 @@ export default function Admin() {
     setSavingProfile(true);
     try {
       const updates = { ...profileForm };
+      // age is an integer column: an empty string makes the whole update fail
+      if (!updates.age) updates.age = null;
       if (!updates.password) delete updates.password;
       await updateRecord("members", profileMember.id, updates);
       toast.success("Profile updated successfully!");
