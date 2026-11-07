@@ -46,12 +46,12 @@ export default function NotificationInbox({ member }) {
     <>
       <button
         onClick={openInbox}
-        className="relative inline-flex items-center justify-center gap-1 bg-sky-600 hover:bg-sky-700 text-white font-bold px-4 py-2 rounded-xl text-xs sm:text-sm h-auto whitespace-nowrap shadow-sm transition-colors"
+        className="relative inline-flex items-center justify-center gap-1 bg-gradient-to-r from-yellow-400 via-lime-400 to-green-500 hover:from-yellow-500 hover:via-lime-500 hover:to-green-600 text-green-950 font-bold px-4 py-2 rounded-xl text-xs sm:text-sm h-auto whitespace-nowrap shadow-sm transition-colors"
         title="Notifications"
       >
         <Bell className="w-4 h-4 mr-1" /> Notifications
         {unread > 0 && (
-          <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-red-500 text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-white">
+          <span className="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 rounded-full bg-red-600 text-white text-[11px] font-bold flex items-center justify-center ring-2 ring-white">
             {unread}
           </span>
         )}
