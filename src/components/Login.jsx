@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { supabase } from "../lib/supabase";
 import { prefetchTables } from "../lib/useData";
 import { saveMemberSession } from "../lib/auth";
+import { getLastLogin, getSavedPassword, saveLogin } from "../lib/savedLogin";
 import AuthShell, { ORANGE_GRADIENT } from "./AuthShell";
 import AuthInput from "./AuthInput";
 
@@ -14,13 +15,17 @@ export default function Login() {
   const [showPwd, setShowPwd] = useState(true);
   const [busy, setBusy] = useState(false);
 
+  // Last credentials used on this device are prefilled, password shown.
   useEffect(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem("saved_login") || "{}");
-      if (saved.username) setForm(f => ({ ...f, username: saved.username }));
-      if (saved.password) setForm(f => ({ ...f, password: saved.password }));
-    } catch (_) { /* ignore */ }
+    const saved = getLastLogin();
+    if (saved) setForm({ username: saved.username, password: saved.password });
   }, []);
+
+  // Typing a username saved earlier on this device fills in its password.
+  function changeUsername(value) {
+    const savedPwd = getSavedPassword(value);
+    setForm(f => ({ ...f, username: value, ...(savedPwd ? { password: savedPwd } : {}) }));
+  }
 
   async function submit(e) {
     e.preventDefault();
@@ -43,7 +48,7 @@ export default function Login() {
         return;
       }
       saveMemberSession(member.id);
-      localStorage.setItem("saved_login", JSON.stringify({ username: form.username, password: form.password }));
+      saveLogin(form.username, form.password);
       prefetchTables(["members", "system_settings", "maintenance_codes", "transactions"]);
       toast.success(`Welcome back, ${member.full_name}!`);
       nav("/Dashboard");
@@ -63,7 +68,7 @@ export default function Login() {
           name="username"
           autoComplete="username"
           value={form.username}
-          onChange={e => setForm({ ...form, username: e.target.value })}
+          onChange={e => changeUsername(e.target.value)}
           placeholder="Enter your username"
         />
         <AuthInput

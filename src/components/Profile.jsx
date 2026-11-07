@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { User, ArrowRight, Copy, Check, Save, Eye, EyeOff } from "lucide-react";
 import toast from "react-hot-toast";
 import { useTable, useCurrentMember, updateRecord } from "../lib/useData";
+import { saveLogin } from "../lib/savedLogin";
 import { Button, Input, Label } from "./ui";
 
 export default function Profile() {
@@ -56,7 +57,7 @@ export default function Profile() {
     if (!updates.password) delete updates.password;
     try {
       await updateRecord("members", currentMember.id, updates);
-      if (updates.password) localStorage.setItem("saved_login", JSON.stringify({ username: currentMember.username, password: updates.password }));
+      if (updates.password) saveLogin(currentMember.username, updates.password);
       toast.success("Profile updated successfully!");
       window.location.reload();
     } catch {
