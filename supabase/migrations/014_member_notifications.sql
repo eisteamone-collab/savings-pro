@@ -16,3 +16,12 @@ create index if not exists idx_member_notifications_member
   on public.member_notifications(member_id, created_at desc);
 
 grant select, insert, update, delete on public.member_notifications to anon;
+
+-- Same access model as the other tables: RLS on with a permissive policy.
+-- Without the policy, marking a notification read silently updates 0 rows and
+-- the unread counter comes back on the next refresh.
+alter table public.member_notifications enable row level security;
+
+drop policy if exists "allow_all_member_notifications" on public.member_notifications;
+create policy "allow_all_member_notifications" on public.member_notifications
+  for all using (true) with check (true);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bell, X, Headset } from "lucide-react";
 import { supabase } from "../lib/supabase";
@@ -11,6 +11,8 @@ export default function NotificationInbox({ member }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const memberId = member?.id;
+  // Ids read in this session: a refresh already in flight must not bring the red count back.
+  const markedRead = useRef(new Set());
 
   const load = useCallback(async () => {
     if (!memberId) return;
@@ -19,7 +21,9 @@ export default function NotificationInbox({ member }) {
       .select("*")
       .eq("member_id", memberId)
       .order("created_at", { ascending: false });
-    if (!error) setItems(data || []);
+    if (!error) {
+      setItems((data || []).map(n => (markedRead.current.has(n.id) ? { ...n, is_read: true } : n)));
+    }
     setLoading(false);
   }, [memberId]);
 
@@ -35,11 +39,13 @@ export default function NotificationInbox({ member }) {
     setOpen(true);
     const unreadIds = items.filter(n => !n.is_read).map(n => n.id);
     if (unreadIds.length === 0) return;
+    unreadIds.forEach(id => markedRead.current.add(id));
     setItems(prev => prev.map(n => (unreadIds.includes(n.id) ? { ...n, is_read: true } : n)));
     await supabase
       .from("member_notifications")
       .update({ is_read: true, read_at: new Date().toISOString() })
-      .in("id", unreadIds);
+      .in("id", unreadIds)
+      .select("id");
   }
 
   return (
