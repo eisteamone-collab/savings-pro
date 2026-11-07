@@ -31,6 +31,7 @@ services:
         psql -v ON_ERROR_STOP=1 -h db -U postgres -f /migrations/010_auto_redeem_server.sql &&
         psql -v ON_ERROR_STOP=1 -h db -U postgres -f /migrations/011_redemption_history_amount.sql &&
         psql -v ON_ERROR_STOP=1 -h db -U postgres -f /migrations/013_member_can_withdraw.sql &&
+        psql -v ON_ERROR_STOP=1 -h db -U postgres -f /migrations/014_member_notifications.sql &&
         echo "Migrations complete"
 
   # Local stand-in for pg_cron: fires the server-side auto-redeem every 30s (it only acts once a day at the admin time)

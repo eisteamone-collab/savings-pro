@@ -14,6 +14,8 @@ Vercel does not apply SQL migrations. Run `supabase/migrations/005_genealogy_pla
 
 Run `supabase/migrations/013_member_can_withdraw.sql` in that same project, then `NOTIFY pgrst, 'reload schema';`, before using per-member withdrawal access. Its boolean default preserves existing members' withdrawal access.
 
+Run `supabase/migrations/014_member_notifications.sql` in the same project (and reload the schema) before the admin's per-member notification button can send: it creates `member_notifications`, the one-way inbox shown in the member dashboard.
+
 ## Interaction and cache quirks
 - Canvas pointer capture must exclude interactive controls, otherwise it redirects the "Place Here" click to the canvas. Keep filtered tree arrays memoized so timer ticks do not remount nodes during a pointer gesture.
 - `useTable` has a session-persisted cache and only refetches on mount unless a caller requests a refresh. Do not use that cached member snapshot as the wallet's live withdrawal permission. `useWithdrawalAccess` reads only the current member's `can_withdraw`, hides controls until access is confirmed, refreshes every five seconds while visible and when focus/visibility returns, and rechecks before submitting.
