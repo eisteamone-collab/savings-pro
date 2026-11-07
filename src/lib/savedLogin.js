@@ -3,6 +3,8 @@
 const KEY = "saved_login_accounts";
 const LEGACY_KEY = "saved_login";
 
+const clean = value => (value || "").trim();
+
 function read() {
   try {
     const raw = JSON.parse(localStorage.getItem(KEY) || "{}");
@@ -22,6 +24,19 @@ function read() {
   }
 }
 
+function write(lastUsername, accounts) {
+  try {
+    localStorage.setItem(KEY, JSON.stringify({ lastUsername, accounts }));
+  } catch (_) { /* storage full or blocked */ }
+}
+
+// Exact key of a saved account, matched without case or surrounding spaces.
+function findKey(accounts, username) {
+  const wanted = clean(username).toLowerCase();
+  if (!wanted) return "";
+  return Object.keys(accounts).find(k => k.trim().toLowerCase() === wanted) || "";
+}
+
 // The credentials used most recently on this device.
 export function getLastLogin() {
   const { lastUsername, accounts } = read();
@@ -29,18 +44,38 @@ export function getLastLogin() {
   return { username: lastUsername, password: accounts[lastUsername] || "" };
 }
 
+// Every account saved on this device, most recently used first.
+export function listLogins() {
+  const { lastUsername, accounts } = read();
+  const names = Object.keys(accounts);
+  names.sort((a, b) => (a === lastUsername ? -1 : b === lastUsername ? 1 : 0));
+  return names.map(username => ({ username, password: accounts[username] }));
+}
+
 // Password saved earlier for a specific username ("" when unknown).
 export function getSavedPassword(username) {
-  if (!username) return "";
-  return read().accounts[username] || "";
+  const { accounts } = read();
+  const key = findKey(accounts, username);
+  return key ? accounts[key] || "" : "";
 }
 
 // Remember these credentials and mark them as the last used.
 export function saveLogin(username, password) {
-  if (!username || !password) return;
+  const name = clean(username);
+  if (!name || !password) return;
   const { accounts } = read();
-  accounts[username] = password;
-  try {
-    localStorage.setItem(KEY, JSON.stringify({ lastUsername: username, accounts }));
-  } catch (_) { /* storage full or blocked */ }
+  const existing = findKey(accounts, name);
+  if (existing) delete accounts[existing];
+  accounts[name] = password;
+  write(name, accounts);
+}
+
+// Stop remembering one account on this device.
+export function removeLogin(username) {
+  const { accounts } = read();
+  const key = findKey(accounts, username);
+  if (!key) return;
+  delete accounts[key];
+  const remaining = Object.keys(accounts);
+  write(remaining[remaining.length - 1] || "", accounts);
 }
