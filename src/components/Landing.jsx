@@ -13,7 +13,7 @@ const STATS = [
 ];
 
 const LOGO_URL = "https://media.base44.com/images/public/6ace162d209700e02c6d0e47/ae16dfe62_Firefly2.png";
-const POSTER_URL = "https://media.base44.com/images/public/6ace49faeb6f2fe9616499fd/7c2cea0a6_ModernMarketingTrifoldBrochure.png";
+const POSTER_URL = "/landing-poster.jpg";
 
 export default function Landing() {
   return (
@@ -50,7 +50,7 @@ export default function Landing() {
         >
           <div className="flex flex-col items-center mb-6">
             <img src={LOGO_URL} alt="Savings Pro Community" className="w-56 sm:w-72 mb-4 drop-shadow-2xl object-contain" />
-            <img src={POSTER_URL} alt="Mga bayad mo sa Produktong binibili mo sa Tindahan, ipon mo na ngayon!" className="w-full max-w-2xl mx-auto mb-4 rounded-2xl drop-shadow-2xl object-cover" />
+            <img src={POSTER_URL} alt="Suki ng Savings Pro na may dalang pinamili mula sa sari-sari store" className="w-full max-w-2xl mx-auto mb-4 rounded-2xl object-cover border-[10px] border-[#EDE6D8] shadow-[0_20px_45px_-15px_rgba(0,0,0,0.7)]" />
             <div className="bg-amber-500/10 border border-amber-400/40 rounded-2xl px-6 py-4 max-w-3xl text-center">
               <p className="text-amber-300 font-bold text-lg sm:text-2xl md:text-3xl leading-snug tracking-wide drop-shadow-lg">Puro Gastos na lang ba sa Tindahan?</p>
               <p className="text-amber-100 font-semibold italic text-base sm:text-xl md:text-2xl leading-relaxed mt-1">
